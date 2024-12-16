@@ -23,12 +23,13 @@ public class WalletController {
     @PostMapping("/create-wallet")
     public ResponseEntity<Wallet> createWallet() {
         Wallet aWallet = walletService.createAWallet();
-        return new ResponseEntity<>(aWallet, HttpStatus.OK);
+        return aWallet != null
+                ? new ResponseEntity<>(aWallet, HttpStatus.CREATED)
+                : new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 
     @PostMapping("/add-asset")
     public ResponseEntity<Wallet> addAssetToWallet(@RequestBody Asset asset) {
-        // Consider adding the wallet id to the path variable
         Wallet aWallet = walletService.getWallet();
         Wallet updatedWallet = walletService.addAssetToWallet(aWallet, asset);
         return new ResponseEntity<>(updatedWallet, HttpStatus.OK);
@@ -44,9 +45,12 @@ public class WalletController {
 
     @PutMapping("/remove-asset")
     public ResponseEntity<Wallet> removeAssetInWallet(@RequestBody Asset asset) {
-        Wallet aWallet = walletService.getWallet();
-        Wallet updatedWallet = walletService.removeAssetFromWallet(aWallet, asset);
-        return new ResponseEntity<>(updatedWallet, HttpStatus.OK);
+        Wallet wallet = walletService.getWallet();
+        if (wallet != null) {
+            Wallet updatedWallet = walletService.removeAssetFromWallet(wallet, asset);
+            return new ResponseEntity<>(updatedWallet, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     @GetMapping("/wallet-value")
