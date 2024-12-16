@@ -10,9 +10,9 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.*;
 import java.util.Map;
- 
+
 @Service
 @AllArgsConstructor
 public class PriceFetcher {
@@ -28,7 +28,6 @@ public class PriceFetcher {
 
     private final List<String> assetSymbols;
 
-    // Cache to store symbol-to-ID mappings
     private final Map<String, String> symbolToIdMap = new ConcurrentHashMap<>();
 
     public PriceFetcher(AssetRepository assetRepository) {
@@ -55,26 +54,51 @@ public class PriceFetcher {
     }
 
     /**
-     * Scheduled task to update the prices of all symbols every 7 seconds.
+     * Scheduled task to update the prices of all symbols every X seconds.
      */
-    @Scheduled(fixedDelay = 10000)
+    @Scheduled(fixedRateString = "${scheduler.fixedDelay}")
     public void updatePrices() {
         // Load symbol-to-ID map if it is empty
         if (symbolToIdMap.isEmpty()) {
             loadSymbolToIdMap();
         }
 
+        ExecutorService executorService = Executors.newFixedThreadPool(3);
+
+        List<Callable<Void>> tasks = new ArrayList<>();
+
         // Fetch prices for all symbols in the cache
         symbolToIdMap.forEach((symbol, assetId) -> {
-            try {
-                if (getAssetSymbols().contains(symbol)) {
-                    double price = fetchPriceFromApi(assetId);
-                    symbolPriceCache.put(symbol, price);
+            tasks.add(() -> {
+                try {
+                    if (getAssetSymbols().contains(symbol)) {
+                        double price = fetchPriceFromApi(assetId);
+                        symbolPriceCache.put(symbol, price);
+                    }
+                } catch (Exception e) {
+                    System.err.println("Error updating price for " + symbol + ": " + e.getMessage());
                 }
-            } catch (Exception e) {
-                System.err.println("Error updating price for " + symbol + ": " + e.getMessage());
-            }
+                return null;
+            });
         });
+
+        try {
+            List<Future<Void>> futures = executorService.invokeAll(tasks);
+
+            // Optionally: Wait for all tasks to complete (or handle results)
+            for (Future<Void> future : futures) {
+                try {
+                    future.get();
+                } catch (ExecutionException e) {
+                    System.err.println("Task execution failed: " + e.getMessage());
+                }
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            System.err.println("Task execution interrupted: " + e.getMessage());
+        } finally {
+            executorService.shutdown();
+        }
     }
 
     public List<String> getAssetSymbols() {
@@ -114,7 +138,6 @@ public class PriceFetcher {
         try {
             String response = restTemplate.getForObject(url, String.class);
 
-            // Parse the JSON response
             JSONObject jsonResponse = new JSONObject(response);
             JSONObject data = jsonResponse.getJSONObject("data");
             return data.getDouble("priceUsd");
