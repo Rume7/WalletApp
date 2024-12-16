@@ -3,7 +3,7 @@ package com.swisspost.controller;
 import com.swisspost.model.Asset;
 import com.swisspost.model.Wallet;
 import com.swisspost.service.WalletService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.swisspost.service.WalletValueCalculator;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,10 +13,11 @@ import org.springframework.web.bind.annotation.*;
 public class WalletController {
 
     private final WalletService walletService;
+    private final WalletValueCalculator walletValueCalculator;
 
-    @Autowired
-    public WalletController(WalletService walletService) {
+    public WalletController(WalletService walletService, WalletValueCalculator walletValueCalculator) {
         this.walletService = walletService;
+        this.walletValueCalculator = walletValueCalculator;
     }
 
     @PostMapping("/create-wallet")
@@ -46,5 +47,30 @@ public class WalletController {
         Wallet aWallet = walletService.getWallet();
         Wallet updatedWallet = walletService.removeAssetFromWallet(aWallet, asset);
         return new ResponseEntity<>(updatedWallet, HttpStatus.OK);
+    }
+
+    @GetMapping("/wallet-value")
+    public double getWalletTotalValue() {
+        return walletValueCalculator.totalWalletValueOfAssets();
+    }
+
+    @GetMapping("/best-asset")
+    public String getBestAsset() {
+        return walletValueCalculator.bestPerformingAsset();
+    }
+
+    @GetMapping("/best-performance")
+    public double getBestPerformanceValue() {
+        return walletValueCalculator.bestPerformingAssetValue();
+    }
+
+    @GetMapping("/worst-asset")
+    public String getWorstAsset() {
+        return walletValueCalculator.worstPerformingAsset();
+    }
+
+    @GetMapping("/worst-performance")
+    public double getWorstPerformanceValue() {
+        return walletValueCalculator.worstPerformingAssetValue();
     }
 }
