@@ -54,32 +54,37 @@ public class WalletController {
     }
 
     @GetMapping("/wallet-value")
-    public double getWalletTotalValue() {
+    public ResponseEntity<Double> getWalletTotalValue() {
         Wallet wallet = getWallet().getBody();
-        return walletValueCalculator.totalWalletValueOfAssets(wallet);
+        Double value = walletValueCalculator.totalWalletValueOfAssets(wallet);
+        return new ResponseEntity<>(value, HttpStatus.OK);
     }
 
     @GetMapping("/best-asset")
-    public String getBestAsset() {
+    public ResponseEntity<String> getBestAsset() {
         Wallet wallet = getWallet().getBody();
-        return walletValueCalculator.bestPerformingAsset(wallet);
+        String symbol = walletValueCalculator.bestPerformingAsset(wallet);
+        return new ResponseEntity<>(symbol, HttpStatus.OK);
     }
 
     @GetMapping("/best-performance")
-    public double getBestPerformanceValue() {
+    public ResponseEntity<Double> getBestPerformanceValue() {
         Wallet wallet = getWallet().getBody();
-        return walletValueCalculator.bestPerformingAssetValue(wallet);
+        Double value = walletValueCalculator.bestPerformingAssetValue(wallet);
+        return new ResponseEntity<>(value, HttpStatus.OK);
     }
 
     @GetMapping("/worst-asset")
-    public String getWorstAsset() {
+    public ResponseEntity<String> getWorstAsset() {
         Wallet wallet = getWallet().getBody();
-        return walletValueCalculator.worstPerformingAsset(wallet);
+        String assetSymbol = walletValueCalculator.worstPerformingAsset(wallet);
+        return new ResponseEntity<>(assetSymbol, HttpStatus.OK);
     }
 
     @GetMapping("/worst-performance")
-    public double getWorstPerformanceValue() {
+    public ResponseEntity<Double> getWorstPerformanceValue() {
         Wallet wallet = getWallet().getBody();
-        return walletValueCalculator.worstPerformingAssetValue(wallet);
+        Double value = walletValueCalculator.worstPerformingAssetValue(wallet);
+        return new ResponseEntity<>(value, HttpStatus.OK);
     }
 }
