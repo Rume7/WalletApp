@@ -29,7 +29,7 @@ public class WalletService {
     }
 
     @Transactional
-    public Wallet createAWallet() {
+    public Wallet createWallet() {
         List<Wallet> foundWallets = walletRepository.findAll();
         if (foundWallets.size() == 0) {
             Wallet walletInstance = Wallet.getWalletInstance();

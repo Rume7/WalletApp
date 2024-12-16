@@ -48,7 +48,7 @@ public class WalletServiceTest {
         // Given & When
         when(walletRepository.save(any(Wallet.class))).thenReturn(testWallet);
 
-        Wallet result = walletService.createAWallet();
+        Wallet result = walletService.createWallet();
 
         // Then
         assertEquals(testWallet, result);
@@ -64,7 +64,7 @@ public class WalletServiceTest {
         when(walletRepository.save(any(Wallet.class))).thenReturn(newWallet);
 
         // When
-        Wallet result = walletService.createAWallet();
+        Wallet result = walletService.createWallet();
 
         // Then
         assertNotNull(result);
@@ -80,7 +80,7 @@ public class WalletServiceTest {
         when(walletRepository.findAll()).thenReturn(existingWallets);
 
         // When
-        Wallet result = walletService.createAWallet();
+        Wallet result = walletService.createWallet();
 
         // Then
         assertNotNull(result);
