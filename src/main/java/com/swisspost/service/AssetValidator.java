@@ -8,7 +8,7 @@ import java.util.Objects;
 
 public class AssetValidator {
 
-    public static void validate(Asset asset) {
+    static void validate(Asset asset) {
         Objects.requireNonNull(asset, "Asset cannot be null");
 
         if (asset.getSymbol() == null || asset.getSymbol().isBlank()) {
