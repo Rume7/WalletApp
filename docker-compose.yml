@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: 'postgres:17.0-alpine'
+    environment:
+      - 'POSTGRES_DB=WalletDB'
+      - 'POSTGRES_USER=postgres'
+      - 'POSTGRES_PASSWORD=/run/secrets/db_pwd'
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d WalletDB"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    secrets:
+      - db_password
+
+secrets:
+  db_password:
+    file: ./secrets/db_pwd.txt
+
+volumes:
+  postgres_data:
+    driver: local
