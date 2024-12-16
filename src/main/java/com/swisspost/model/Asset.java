@@ -19,7 +19,6 @@ public class Asset {
     @Enumerated(EnumType.STRING)
     private AssetStatus assetStatus;
 
-
     public Asset(String symbol, double quantity, double price) {
         this.symbol = symbol;
         this.quantity = quantity;
