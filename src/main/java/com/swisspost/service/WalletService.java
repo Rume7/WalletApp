@@ -33,8 +33,7 @@ public class WalletService {
         List<Wallet> foundWallets = walletRepository.findAll();
         if (foundWallets.size() == 0) {
             Wallet walletInstance = Wallet.getWalletInstance();
-            Wallet savedWallet = walletRepository.save(walletInstance);
-            return savedWallet;
+            return walletRepository.save(walletInstance);
         }
         return foundWallets.get(0);
     }
@@ -60,7 +59,7 @@ public class WalletService {
            if (existingAsset != null) {
                // updating the quantity of the existing asset in the wallet
                double newQuantity = existingAsset.getQuantity() + newAsset.getQuantity();
-               return new Asset(existingAsset.getSymbol(), newQuantity, existingAsset.getPrice());
+               return new Asset(existingAsset.getSymbol(), newQuantity, existingAsset.getPrice(), AssetStatus.BUY);
            }
            return newAsset;
         });
@@ -101,7 +100,7 @@ public class WalletService {
             foundWallet.removeCryptoAsset(existingAsset);
         } else {
             // Update the asset with the reduced quantity
-            Asset updatedAsset = new Asset(existingAsset.getSymbol(), newQuantity, existingAsset.getPrice());
+            Asset updatedAsset = new Asset(existingAsset.getSymbol(), newQuantity, existingAsset.getPrice(), AssetStatus.SELL);
             assetMap.put(existingAsset.getSymbol(), updatedAsset);
         }
 
