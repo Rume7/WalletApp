@@ -1,0 +1,16 @@
+logging:
+  level:
+    org.springframework.scheduling: DEBUG
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/WalletDB
+    username: postgres
+    password: Research7!
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: create
+    show-sql: true
