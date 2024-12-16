@@ -2,7 +2,6 @@ package com.swisspost.service;
 
 import com.swisspost.model.Asset;
 import com.swisspost.model.Wallet;
-import com.swisspost.repository.AssetRepository;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
