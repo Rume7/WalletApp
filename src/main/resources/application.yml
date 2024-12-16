@@ -14,3 +14,6 @@ spring:
     hibernate:
       ddl-auto: create
     show-sql: true
+
+scheduler:
+  fixedDelay: 10000 # 10 seconds
