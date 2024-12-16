@@ -1,40 +1,38 @@
 package com.swisspost.service;
 
 import com.swisspost.model.Asset;
+import com.swisspost.model.Wallet;
 import com.swisspost.repository.AssetRepository;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Comparator;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 public class WalletValueCalculator {
 
-    private final AssetRepository assetRepository;
-
     private final PriceFetcher priceFetcher;
 
-    public WalletValueCalculator(AssetRepository assetRepository, PriceFetcher priceFetcher) {
-        this.assetRepository = assetRepository;
+    public WalletValueCalculator(PriceFetcher priceFetcher) {
         this.priceFetcher = priceFetcher;
     }
 
-    private Map<String, Double> totalValueOfAssetAtPurchasePrice() {
-        List<Asset> assetList = assetRepository.findAll();
-        return assetList.parallelStream()
+    private Map<String, Double> totalValueOfAssetAtPurchasePrice(Wallet wallet) {
+        Set<Asset> walletCryptoAssets = wallet.getCryptoAssets();
+        return walletCryptoAssets.parallelStream()
                 .collect(Collectors.groupingBy(
                         Asset::getSymbol,
                         Collectors.summingDouble(asset -> asset.getQuantity() * asset.getPrice())
                 ));
     }
 
-    private Map<String, Double> totalValueOfAssetAtCurrentPrice() {
-        List<Asset> assetList = assetRepository.findAll();
-        return assetList.parallelStream()
+    private Map<String, Double> totalValueOfAssetAtCurrentPrice(Wallet wallet) {
+        Set<Asset> walletCryptoAssets = wallet.getCryptoAssets();
+        return walletCryptoAssets.parallelStream()
                 .collect(Collectors.groupingBy(
                         Asset::getSymbol,
                         Collectors.summingDouble(asset ->
@@ -42,16 +40,17 @@ public class WalletValueCalculator {
                 )));
     }
 
-    public double totalWalletValueOfAssets() {
-        List<Asset> assetList = assetRepository.findAll();
-        return assetList.parallelStream()
-                .mapToDouble(asset -> asset.getQuantity() * asset.getPrice())
+    public double totalWalletValueOfAssets(Wallet wallet) {
+        Map<String, Double> assetsAtCurrentPrice = totalValueOfAssetAtCurrentPrice(wallet);
+        return assetsAtCurrentPrice.values()
+                .stream()
+                .mapToDouble(Double::doubleValue)
                 .sum();
     }
 
-    private Map.Entry<String, Double> bestPerformingAssetWithGrowthRate() {
-        Map<String, Double> initialValueMap = totalValueOfAssetAtPurchasePrice();
-        Map<String, Double> currentValueMap = totalValueOfAssetAtCurrentPrice();
+    private Map.Entry<String, Double> bestPerformingAssetWithGrowthRate(Wallet wallet) {
+        Map<String, Double> initialValueMap = totalValueOfAssetAtPurchasePrice(wallet);
+        Map<String, Double> currentValueMap = totalValueOfAssetAtCurrentPrice(wallet);
 
         return currentValueMap.entrySet().stream()
                 .filter(entry -> {
@@ -78,17 +77,17 @@ public class WalletValueCalculator {
                 .orElse(null); // Return null if no valid asset is found
     }
 
-    public String bestPerformingAsset() {
-        return bestPerformingAssetWithGrowthRate().getKey();
+    public String bestPerformingAsset(Wallet wallet) {
+        return bestPerformingAssetWithGrowthRate(wallet).getKey();
     }
 
-    public double bestPerformingAssetValue() {
-        return bestPerformingAssetWithGrowthRate().getValue();
+    public double bestPerformingAssetValue(Wallet wallet) {
+        return bestPerformingAssetWithGrowthRate(wallet).getValue();
     }
 
-    private Map.Entry<String, Double> worstPerformingAssetWithGrowthRate() {
-        Map<String, Double> initialValueMap = totalValueOfAssetAtPurchasePrice();
-        Map<String, Double> currentValueMap = totalValueOfAssetAtCurrentPrice();
+    private Map.Entry<String, Double> worstPerformingAssetWithGrowthRate(Wallet wallet) {
+        Map<String, Double> initialValueMap = totalValueOfAssetAtPurchasePrice(wallet);
+        Map<String, Double> currentValueMap = totalValueOfAssetAtCurrentPrice(wallet);
 
         return currentValueMap.entrySet().stream()
                 .filter(entry -> {
@@ -114,11 +113,11 @@ public class WalletValueCalculator {
                 .orElse(null);
     }
 
-    public String worstPerformingAsset() {
-        return worstPerformingAssetWithGrowthRate().getKey();
+    public String worstPerformingAsset(Wallet wallet) {
+        return worstPerformingAssetWithGrowthRate(wallet).getKey();
     }
 
-    public double worstPerformingAssetValue() {
-        return worstPerformingAssetWithGrowthRate().getValue();
+    public double worstPerformingAssetValue(Wallet wallet) {
+        return worstPerformingAssetWithGrowthRate(wallet).getValue();
     }
 }

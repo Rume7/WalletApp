@@ -55,26 +55,31 @@ public class WalletController {
 
     @GetMapping("/wallet-value")
     public double getWalletTotalValue() {
-        return walletValueCalculator.totalWalletValueOfAssets();
+        Wallet wallet = getWallet().getBody();
+        return walletValueCalculator.totalWalletValueOfAssets(wallet);
     }
 
     @GetMapping("/best-asset")
     public String getBestAsset() {
-        return walletValueCalculator.bestPerformingAsset();
+        Wallet wallet = getWallet().getBody();
+        return walletValueCalculator.bestPerformingAsset(wallet);
     }
 
     @GetMapping("/best-performance")
     public double getBestPerformanceValue() {
-        return walletValueCalculator.bestPerformingAssetValue();
+        Wallet wallet = getWallet().getBody();
+        return walletValueCalculator.bestPerformingAssetValue(wallet);
     }
 
     @GetMapping("/worst-asset")
     public String getWorstAsset() {
-        return walletValueCalculator.worstPerformingAsset();
+        Wallet wallet = getWallet().getBody();
+        return walletValueCalculator.worstPerformingAsset(wallet);
     }
 
     @GetMapping("/worst-performance")
     public double getWorstPerformanceValue() {
-        return walletValueCalculator.worstPerformingAssetValue();
+        Wallet wallet = getWallet().getBody();
+        return walletValueCalculator.worstPerformingAssetValue(wallet);
     }
 }
